@@ -128,7 +128,7 @@ int collectData(int status){
 }
 
 int stop(){
-  Serial.flush();
+  clearBuffers();
   Serial.println("done");
   return 0;
 }
