@@ -93,25 +93,25 @@ void white(){
 
 void calibrate(){
 
-  Serial.print("Dunkel\n");
+  Serial.println("Dunkel");
   getChar();
   clearBuffers();
   dark();
-  Serial.print("Dunkel values:\n");
+  Serial.print("Dunkel values:");
   rgbPrintln();
 
-  Serial.print("Weiss\n");
+  Serial.println("Weiss");
   getChar();
   clearBuffers();
   white();
-  Serial.print("Weiss values:\n");
+  Serial.print("Weiss values:");
   rgbPrintln();
-  Serial.print("done\n");
+  Serial.println("done");
 
 }
 
 int menu(){
-  Serial.println("menu, waiting int");
+  //Serial.println("menu, waiting int");
   return getInt();
 }
 
@@ -142,9 +142,7 @@ void setup() {
   // put your setup code here, to run once:
 
   Serial.begin(BAUDS);
-  Serial.print(F("[TCS230 Demo]\n"));
-  Serial.flush();
-//  pinMode(LED , OUTPUT);
+  clearBuffers();	//  pinMode(LED , OUTPUT);
   CS.begin();
 }
 

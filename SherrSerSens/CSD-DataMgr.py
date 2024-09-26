@@ -30,9 +30,15 @@ class DataCollector:
 
 
     async def collect_data(self):        
+        with open('./tset.txt','w') as file :
+            file.write('lptm we')
+            file.close()
+        print("entered")
         self.stop_event.clear()
         self.data.append(CSV_Header)
+        print("entered2")
         while not self.stop_event.is_set():
+            print("while loop")
             try:
                 ser_read = [random.randint(0,22550)*6] if TEST_MODE else self.ser.readline().decode().strip()
                 self.data.append(ser_read)
@@ -42,9 +48,11 @@ class DataCollector:
                 print(f"Error reading data: {e}")
             if TEST_MODE:
                 await asyncio.sleep(1) 
+        self.stop_event.clear()
+
      
 
-    async def calibrate_sensor(self):
+    def calibrate_sensor(self):
         
         while not self.done_event.is_set():
             try:
@@ -52,7 +60,7 @@ class DataCollector:
                 if TEST_MODE and data%7==0:
                     data = 'done'
                 if(data == 'req_in'):
-                    self.ser.write(input("input required").encode())
+                    self.ser.write(input("input required").strip().encode())
                 elif(data == 'done'):
                     self.done_event.set()
                 else:
@@ -63,16 +71,16 @@ class DataCollector:
         self.done_event.clear()
         
 
-    async def stop_collection(self):
+    async   def stop_collection(self):
 
         self.stop_event.set()  # Signal data collection coroutine to stop
         print("Stopping data collection.")
         if TEST_MODE: # if test wait a bit else signal interface to stop data collection 
             await asyncio.sleep(1)
         else:
-            self.ser.write('3'.encode())
+            self.ser.write('3\n'.encode())
 
-        while not TEST_MODE and self.ser.readline().decode().strip() != 'done':
+        while self.stop_event.set() or (not TEST_MODE and self.ser.readline().decode().strip() != 'done'):
             pass
 
         print("Saving collected data.")
@@ -83,7 +91,6 @@ class DataCollector:
         outFile.close()
         print(f"# rows: {self.data.__len__()}")
         self.data.clear()
-        self.stop_event.clear()
 #
 #
 #
@@ -91,10 +98,12 @@ class DataCollector:
 #
 #
 
+async def ainput(prompt):
+    return input(prompt)
 
 async def main_menu(serial_port):
     collector = DataCollector(serial_port)
-
+    tasks = set()
     print("\n_____________________________\n\\Welcome to the greatest show!\\\n ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾")
 
     
@@ -106,20 +115,26 @@ async def main_menu(serial_port):
         print("4. Exit")
         #list ports
         #set up stuff
-        choice = input("Enter your choice (1/2/3/4): ")
+        choice =  input("Enter your choice (1/2/3/4):")
         
 
         if choice == '1':
             print("Collecting data...")
-            asyncio.create_task(collector.collect_data())
+            #c_task =  asyncio.create_task( asyncio.to_thread(collector.collect_data()))
+            #tasks.add(c_task)
+            #c_task.add_done_callback(tasks.discard)
+            c_task = asyncio.create_task((collector.collect_data()))
+            await asyncio.sleep(5)
+            #await ainput("input anything to continue.")
+
 
         elif choice == '2':
             print("Calibrating sensor...")
-            await collector.calibrate_sensor()
+            collector.calibrate_sensor()
             print("Calibratitinated")
 
         elif choice == '3':
-            await collector.stop_collection()
+            await   collector.stop_collection()
         elif choice == '4':
             print("Have a waandafool deeeiiyum!")
             exit()
