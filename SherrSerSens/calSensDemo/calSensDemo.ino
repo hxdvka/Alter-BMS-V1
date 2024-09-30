@@ -32,7 +32,7 @@ int getInt()
 	return(Serial.parseInt());
 }
 
-// clear all characters from the serial input/output
+// clear all characters from the serial input
 void clearBuffers()
 {
   //Serial.flush();
@@ -93,15 +93,15 @@ void white(){
 void calibrate(){
 
   Serial.println("Dunkel");
-  getChar();
   clearBuffers();
+  getChar();
   dark();
   Serial.print("Dunkel values:");
   rgbPrintln();
 
   Serial.println("Weiss");
-  getChar();
   clearBuffers();
+  getChar();
   white();
   Serial.print("Weiss values:");
   rgbPrintln();
@@ -111,14 +111,17 @@ void calibrate(){
 
 int menu(){
   //Serial.println("menu, waiting int");
+  clearBuffers();
   return getInt();
 }
 
 int collectData(int status){
+  clearBuffers();
   while(status == 1){
     if(Serial.available()){
-      //Serial.println(Serial.read());
-      status = 3;
+      if(Serial.read() == '3'){
+            clearBuffers();
+            status = 3;}
     }
     while(readSensor());
     rgbPrintln();  
@@ -149,17 +152,12 @@ void loop() {
   // 0 waiting ; 1 read ; 2 cal ; 3 stop ; 4 clear and back to zero
   
   static short status = 0;
-  Serial.print("stat post : ");
-  Serial.println(status);
-
   switch (status){
 
     case 0: 
       status = menu();
-      clearBuffers();
       break;
     case 1: 
-      clearBuffers();
       status = collectData(status);
       break;
     case 2: 

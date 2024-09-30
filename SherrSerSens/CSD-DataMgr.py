@@ -33,11 +33,11 @@ class DataCollector:
         self.data = queue.deque()
 
 
-    async def collect_data(self):        
+    async def collect_data(self):
         self.stop_event.clear()
         self.data.append(CSV_Header)
+        self.ser.write('1'.encode())
         while not self.stop_event.is_set():
-            print("while loop")
             try:
                 ser_read = [random.randint(0,22550)*6] if TEST_MODE else self.ser.readline().decode().strip()
                 self.data.append(ser_read)
@@ -52,7 +52,7 @@ class DataCollector:
      
 
     def calibrate_sensor(self):
-        
+        self.ser.write('2'.encode())
         while not self.done_event.is_set():
             try:
                 data = random.randint(0,155) if TEST_MODE else self.ser.readline().decode().strip()
@@ -77,7 +77,7 @@ class DataCollector:
         if TEST_MODE: # if test wait a bit else signal interface to stop data collection 
             await asyncio.sleep(1)
         else:
-            self.ser.write('3\n'.encode())
+            self.ser.write('3'.encode())
 
         while self.stop_event.set() or (not TEST_MODE and self.ser.readline().decode().strip() != 'done'):
             pass
@@ -114,13 +114,15 @@ async def main_menu(serial_port):
         print("4. Exit")
         #list ports
         #set up stuff
-        choice =  input("Enter your choice (1/2/3/4):")
-        
+        print(f'discarded junk:{self.ser.in_waiting}')
+        self.ser.reset_input_buffer()
+
+        choice =  await asyncio.to_thread(input,"Enter your choice (1/2/3/4):")
 
         if choice == '1':
             print("Collecting data...")
             c_task = asyncio.create_task((collector.collect_data()))
-            await asyncio.sleep(5)
+            #await asyncio.sleep(5)
             #await ainput("input anything to continue.")
 
 
