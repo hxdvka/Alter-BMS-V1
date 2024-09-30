@@ -26,8 +26,8 @@ String getChar()
 
 int getInt()
 { 
+  clearBuffers();
   Serial.println("req_in");
-  Serial.flush();
 	while (Serial.available() == 0);
 	return(Serial.parseInt());
 }
@@ -35,8 +35,7 @@ int getInt()
 // clear all characters from the serial input/output
 void clearBuffers()
 {
-  Serial.flush();
-
+  //Serial.flush();
 	while (Serial.available()){
     Serial.read();
   }

@@ -6,6 +6,7 @@ import  queue
 
 import csv
 import random
+import time
 """
 TODO :: change this to dict or enum and std thing
 Serial Codes:
@@ -13,6 +14,9 @@ req_in      := requesting input
 done        := signals a process has completed (i.e. calibration), clear event after completion
 
 """
+
+
+
 outF_name = "testfile_m"
 outF_path = "./"
 SERIAL_PORT = "COMX"
@@ -30,13 +34,8 @@ class DataCollector:
 
 
     async def collect_data(self):        
-        with open('./tset.txt','w') as file :
-            file.write('lptm we')
-            file.close()
-        print("entered")
         self.stop_event.clear()
         self.data.append(CSV_Header)
-        print("entered2")
         while not self.stop_event.is_set():
             print("while loop")
             try:
@@ -120,9 +119,6 @@ async def main_menu(serial_port):
 
         if choice == '1':
             print("Collecting data...")
-            #c_task =  asyncio.create_task( asyncio.to_thread(collector.collect_data()))
-            #tasks.add(c_task)
-            #c_task.add_done_callback(tasks.discard)
             c_task = asyncio.create_task((collector.collect_data()))
             await asyncio.sleep(5)
             #await ainput("input anything to continue.")
