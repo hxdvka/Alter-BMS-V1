@@ -19,7 +19,7 @@ done        := signals a process has completed (i.e. calibration), clear event a
 
 outF_name = "testfile_m"
 outF_path = "./"
-SERIAL_PORT = "COMX"
+SERIAL_PORT = "COMx"
 TEST_MODE = 1
 CSV_Header = "testme"
 
@@ -37,16 +37,18 @@ class DataCollector:
         self.stop_event.clear()
         self.data.append(CSV_Header)
         self.ser.write('1'.encode())
+        aux = time.time()
         while not self.stop_event.is_set():
             try:
                 ser_read = [random.randint(0,22550)*6] if TEST_MODE else self.ser.readline().decode().strip()
                 self.data.append(ser_read)
                 #store read on dequeue
             except Exception as e:
-                data.append(f"Error reading data: {e}")
+                self.data.append(f"Error reading data: {e}")
                 print(f"Error reading data: {e}")
-            if TEST_MODE:
-                await asyncio.sleep(1) 
+            if TEST_MODE or 3 < (time.time() - aux):
+                aux = time.time()
+                await asyncio.sleep(0.1) 
         self.stop_event.clear()
 
      
@@ -114,11 +116,11 @@ async def main_menu(serial_port):
         print("4. Exit")
         #list ports
         #set up stuff
-        print(f'discarded junk:{self.ser.in_waiting}')
-        self.ser.reset_input_buffer()
+        print(f'discarded junk:{collector.ser.in_waiting}')
+        collector.ser.reset_input_buffer()
 
         choice =  await asyncio.to_thread(input,"Enter your choice (1/2/3/4):")
-
+        print(choice)
         if choice == '1':
             print("Collecting data...")
             c_task = asyncio.create_task((collector.collect_data()))
