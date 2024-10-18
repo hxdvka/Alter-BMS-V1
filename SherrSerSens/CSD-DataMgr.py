@@ -86,9 +86,10 @@ class DataCollector:
 
         print("Saving collected data.")
         with open( f"{outF_path}{outF_name}{self.outF_count}.csv",'w', newline ='' ) as outFile:
+            auxData = map(lambda row : row.split(','), self.data)
             self.outF_count +=1
             writer = csv.writer(outFile)
-            writer.writerows(self.data)
+            writer.writerows(auxData)
         outFile.close()
         print(f"# rows: {self.data.__len__()}")
         self.data.clear()
